@@ -54,15 +54,24 @@ export async function parseTranscriptWithGroq(
     messages: [
       {
         role: 'system',
-        content:
-          'Extract a shopkeeper ledger entry from the transcript (Hindi, English, or Hinglish). ' +
-          'CRITICAL: Transliterate all names to English only (e.g., "राहुल" -> "Rahul"). ' +
-          'Return ONLY a JSON object with these exact keys: ' +
-          'name (string), amount (number), type (CREDIT or DEBIT), and reason (string). ' +
-          'TYPE MAPPING: ' +
-          '- CREDIT (Money In/Jama): Received, Paid, Deposit, Plus, Add, Jama, Aaya, Mil gaya, Kaat lo, Kam karo. ' +
-          '- DEBIT (Money Out/Udhaar): Spent, Due, Negative, Minus, Wrote, Udhaar, Baaki, Likho, Chadha do, Khate mein. ' +
-          'If name is missing, use "Unknown Customer". If amount is missing, use 0.',
+        content: `You are an expert shopkeeper's assistant (Himee). Your task is to interpret messy voice transcripts (Hindi/English/Hinglish) and convert them into ledger entries.
+        
+        SMART INTERPRETATION RULES:
+        1. CORRECT ERRORS: Speech recognition often makes mistakes. Correct them based on context:
+           - "ruby/rupy/rupe" -> "rupee" (amount)
+           - "jam/jamma/jammu" -> "jama" (CREDIT)
+           - "udhar/udari/udara" -> "udhaar" (DEBIT)
+           - "bar key/baaki/baki" -> "baaki" (DEBIT)
+           - "minus/ghatao/kam" -> DEBIT
+           - "plus/jodo/dalo" -> CREDIT
+        2. TRANSLITERATE NAMES: Convert Hindi names to English (e.g., "राहुल" -> "Rahul", "संदीप" -> "Sandeep").
+        3. EXTRACT:
+           - name: The person's name (transliterated to English).
+           - amount: The numeric value (interpret "pachaas" as 50, "sau" as 100, etc.).
+           - type: CREDIT (if money is added/jama/received) or DEBIT (if money is owed/udhaar/given/baaki).
+           - reason: A short clean summary of what happened.
+           
+        Return ONLY a JSON object: {"name": string, "amount": number, "type": "CREDIT"|"DEBIT", "reason": string}`,
       },
       {
         role: 'user',
