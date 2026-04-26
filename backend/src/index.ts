@@ -44,10 +44,15 @@ app.post('/sync', async (request, response) => {
     return;
   }
 
+  console.log('[Sync] Received sync request. Count:', transactions.length);
+  console.log('[Sync] Mongoose connection state:', mongoose.connection.readyState);
+
   if (mongoose.connection.readyState !== 1) {
+    console.error('[Sync] ERROR: MongoDB is not connected! State:', mongoose.connection.readyState);
     response.json({
       syncedLocalIds: [],
       failedLocalIds: transactions.map((transaction) => transaction.localId),
+      error: 'Database not connected'
     });
     return;
   }
@@ -60,7 +65,7 @@ app.post('/sync', async (request, response) => {
           localId: transaction.localId,
           name: transaction.name,
           amount: transaction.amount,
-          type: transaction.type,
+          type: transaction.type.toUpperCase().includes('DEBIT') ? 'DEBIT' : 'CREDIT',
           reason: transaction.reason,
           isSynced: true,
           createdAt: new Date(transaction.createdAt),
@@ -80,10 +85,12 @@ app.post('/sync', async (request, response) => {
       failedLocalIds: [],
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown sync error';
+    console.error('[Sync] Bulk write FAILED:', errorMessage);
     response.status(500).json({
       syncedLocalIds: [],
       failedLocalIds: transactions.map((transaction) => transaction.localId),
-      error: error instanceof Error ? error.message : 'Unknown sync error',
+      error: errorMessage,
     });
   }
 });

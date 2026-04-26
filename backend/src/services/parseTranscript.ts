@@ -77,10 +77,13 @@ export async function parseTranscriptWithGroq(
 
   const parsed = JSON.parse(message) as ParsedTransactionPayload;
 
+  const rawType = String(parsed.type).toUpperCase();
+  const normalizedType = rawType.includes('DEBIT') || rawType.includes('UDHAAR') ? 'DEBIT' : 'CREDIT';
+
   return {
-    name: parsed.name,
-    amount: Number(parsed.amount),
-    type: parsed.type,
-    reason: parsed.reason,
+    name: parsed.name || 'Unknown Customer',
+    amount: Number(parsed.amount) || 0,
+    type: normalizedType as 'CREDIT' | 'DEBIT',
+    reason: parsed.reason || '',
   };
 }
