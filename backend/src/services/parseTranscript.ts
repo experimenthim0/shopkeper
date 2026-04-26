@@ -55,9 +55,13 @@ export async function parseTranscriptWithGroq(
       {
         role: 'system',
         content:
-          'Extract a shopkeeper ledger entry from the transcript. ' +
+          'Extract a shopkeeper ledger entry from the transcript (Hindi, English, or Hinglish). ' +
+          'CRITICAL: Transliterate all names to English only (e.g., "राहुल" -> "Rahul"). ' +
           'Return ONLY a JSON object with these exact keys: ' +
-          'name (string), amount (number), type (CREDIT if money in/jama, DEBIT if money out/udhaar), and reason (string). ' +
+          'name (string), amount (number), type (CREDIT or DEBIT), and reason (string). ' +
+          'TYPE MAPPING: ' +
+          '- CREDIT (Money In/Jama): Received, Paid, Deposit, Plus, Add, Jama, Aaya, Mil gaya, Kaat lo, Kam karo. ' +
+          '- DEBIT (Money Out/Udhaar): Spent, Due, Negative, Minus, Wrote, Udhaar, Baaki, Likho, Chadha do, Khate mein. ' +
           'If name is missing, use "Unknown Customer". If amount is missing, use 0.',
       },
       {

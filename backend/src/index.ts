@@ -116,6 +116,15 @@ app.post('/process-ai', async (request, response) => {
   }
 });
 
+app.get('/transactions', async (req, res) => {
+  try {
+    const transactions = await TransactionModel.find().sort({ createdAt: -1 });
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
 });
