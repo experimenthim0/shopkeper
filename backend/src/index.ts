@@ -65,7 +65,7 @@ app.post('/sync', async (request, response) => {
           localId: transaction.localId,
           name: transaction.name,
           amount: transaction.amount,
-          type: transaction.type.toUpperCase().includes('DEBIT') ? 'DEBIT' : 'CREDIT',
+          type: (transaction.type.toUpperCase().includes('DEBIT') ? 'DEBIT' : 'CREDIT') as 'CREDIT' | 'DEBIT',
           reason: transaction.reason,
           isSynced: true,
           createdAt: new Date(transaction.createdAt),
