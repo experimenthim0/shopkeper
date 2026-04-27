@@ -125,6 +125,32 @@ app.get('/transactions', async (req, res) => {
   }
 });
 
+app.delete('/transaction/:localId', async (req, res) => {
+  const { localId } = req.params;
+  console.log('[Delete] Deleting transaction:', localId);
+
+  if (!localId) {
+    res.status(400).json({ error: 'localId is required' });
+    return;
+  }
+
+  if (mongoose.connection.readyState !== 1) {
+    console.warn('[Delete] MongoDB not connected, skipping cloud delete');
+    res.json({ deleted: false, reason: 'Database not connected' });
+    return;
+  }
+
+  try {
+    const result = await TransactionModel.deleteOne({ localId });
+    console.log('[Delete] Result:', result);
+    res.json({ deleted: result.deletedCount > 0, localId });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Delete] Failed:', errorMessage);
+    res.status(500).json({ error: errorMessage });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
 });
